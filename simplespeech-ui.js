@@ -11,7 +11,7 @@
 (function(simplespeech) {
     'use strict';
 
-    simplespeech.editgraph = function() {
+    var EditHistory = function() {
 
         var base = [];
         var g = [];
@@ -22,6 +22,8 @@
             this.uid = uid;
             this.word = word;
         };
+
+        var onchange = null;
 
         var onset = function(setops) {
             g = []; base = [];
@@ -38,7 +40,7 @@
                 return;
             }
             g.push(new op(edittype.INS, idx, uid, word));
-            if (this.onchange) this.onchange();
+            if (onchange) onchange();
         };
         var onremove = function(idx, uid, word) {
             if (idx >= g.length || idx < 0) {
@@ -46,7 +48,7 @@
                 return;
             }
             g.push(new op(edittype.DEL, idx, uid, word));
-            if (this.onchange) this.onchange();
+            if (onchange) onchange();
         };
         var onreplace = function(idx, uid, word) {
             if (idx >= g.length || idx < 0) {
@@ -54,23 +56,24 @@
                 return;
             }
             g.push(new op(edittype.REPL, idx, uid, word));
-            if (this.onchange) this.onchange();
+            if (onchange) onchange();
         };
 
         return {
-            listen: function(ssui) {
+            listen: function(ssui, cbOnChange) {
                 ssui.oninsert = oninsert;
                 ssui.onremove = onremove;
                 ssui.onreplace = onreplace;
                 ssui.onset = onset;
+                onchange = cbOnChange;
             },
             disconnect: function() {
                 ssui.oninsert = null;
                 ssui.onremove = null;
                 ssui.onreplace = null;
                 ssui.onset = null;
+                onchange = null;
             },
-            onchange: null,
 
             /**
              * Applies edit ops to array (talkens, timestamps, etc) where each obj must have .word attribute.
@@ -95,7 +98,7 @@
         };
     };
 
-    simplespeech.ui = function(__div) {
+    simplespeech.ui = function(__div, cbOnEdit) {
         var pub = {};
 
         // DOM elements
@@ -106,7 +109,18 @@
         // Mutation observer
         var observer, config;
 
+        // Edit history
+        var editctrl;
+        pub.getEditHistory = function() {
+            return editctrl;
+        };
+
         // Listener callbacks
+        /**
+         * Callback when a change occurs to the EditHistory.
+         */
+         pub.onchange = null;
+
         /**
          * Fired when element is removed.
          * Function in form (index, uid, word).
@@ -133,6 +147,10 @@
 
         // Init
         var _init = function() {
+
+            // Init edit history
+            editctrl = new EditHistory();
+            editctrl.listen(pub, cbOnEdit);
 
             $overlay = generateOverlayDiv();
             console.log('Overlay div generated: ', $overlay[0]);

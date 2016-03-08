@@ -14,12 +14,9 @@
             $(window).load(function() {
 
                 var $textbox = $('.r2_piece_editable_audio_textbox');
-                var ssui = new simplespeech.ui($textbox[0]);
+                var ssui = new simplespeech.ui($textbox[0], function(editHistory) {} );
 
                 ssui.set('This is an automated voice system');
-
-                var eg = new simplespeech.editgraph();
-                eg.listen(ssui);
 
                 ssui.monitor();
 
