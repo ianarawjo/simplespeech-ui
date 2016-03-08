@@ -139,6 +139,16 @@
             console.log('Adding overlay div to textbox: ', $textbox[0]);
             $textbox.append($overlay);
 
+            var $whitebox = $(document.createElement('div'));
+            $whitebox.css('display', 'inline-block');
+            $whitebox.css('position', 'absolute');
+            $whitebox.css('width', '100%');
+            $whitebox.css('height', '100%');
+            $whitebox.css('background-color', 'white');
+            $whitebox.css('opacity', 0);
+            $whitebox.css('z-index', '1');
+            $overlay.append($whitebox);
+
             // Charwidth prototype
             $token = $(document.createElement('span'));
             $token.addClass('ssui-charwidth');
@@ -219,7 +229,7 @@
             var allowed_keys_with_mod = [86, 88, 90, 67];
             if (e.keyCode === 32) { // SPACE
 
-                var c = caret()+1;
+                var c = caret()+2;
                 var $o = overlayAtIndex(c);
                 if ($o.hasClass('pause')) {
 
@@ -233,7 +243,7 @@
                     $s.css('letter-spacing', $o.width());
                     $s.attr('word', added_space);
 
-                    pub.onreplace(c, uid, added_space);
+                    pub.onreplace(c, $o.attr('uid'), added_space);
 
                 } else if (overlayAtIndex(c+1).length > 0 && overlayAtIndex(c+1).hasClass('pause')) {
 
@@ -310,7 +320,7 @@
                 var previdx = Number($(addedNodes[0]).attr('idx'));
                 $(addedNodes).each(function(value, index) {
                     if(this.nodeType === 1) {
-                        var $prevtxt = overlayAtIndex(previdx);
+                        var $prevtxt = overlayAtIndex(previdx+1);
                         //var $prevtxt = $('#' + $(this).prev().attr('uid'));
                         console.log(value, previdx, $prevtxt[0]);
                         var uid = $(this).attr('uid');
@@ -398,7 +408,7 @@
                 var range = win.getSelection().getRangeAt(0);
                 var preCaretRange = range.cloneRange();
                 preCaretRange.selectNodeContents(element);
-                preCaretRange.setStart(preCaretRange.startContainer, 3);
+                preCaretRange.setStart(preCaretRange.startContainer, 4);
                 preCaretRange.setEnd(range.endContainer, range.endOffset);
                 caretOffset = preCaretRange.toString().length;
             }

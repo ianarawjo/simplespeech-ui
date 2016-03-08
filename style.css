@@ -1,6 +1,6 @@
 .r2_piece_editable_audio_textoverlay {
     position: absolute;
-    z-index: -1;
+    z-index: 0;
 }
 .r2_piece_editable_audio_textoverlay > .textwidth {
     margin-left: 4px;
@@ -14,9 +14,11 @@
     width: 400px;
     height: 200px;
     padding: 40px;
+    z-index: 2;
 }
 
 .r2_piece_editable_audio_textbox > .ssui-charwidth {
+    position: relative;
     margin-left: 1px;
     border-style: solid;
     border-width: 1px;
@@ -26,7 +28,7 @@
 }
 .ssui-overlay {
     position: absolute;
-    z-index: -1;
+    z-index: 0;
     -moz-user-select: -moz-none;
     -khtml-user-select: none;
     -webkit-user-select: none;
