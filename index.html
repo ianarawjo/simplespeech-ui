@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Simple Speech UI</title>
+        <link rel="stylesheet" type="text/css" href="style.css" charset="utf-8">
+        <script src="jquery-1.11.3.min.js"></script>
+        <script src="caret.js" charset="utf-8"></script>
+        <script src="simplespeech-ui.js" charset="utf-8"></script>
+        <script type="text/javascript">
+
+            //var txt = "This is a test of \xa0 the automated voice";
+
+            $(window).load(function() {
+
+                var $textbox = $('.r2_piece_editable_audio_textbox');
+                var ssui = new simplespeech.ui($textbox[0]);
+
+                ssui.set('This is an automated voice system');
+
+                var eg = new simplespeech.editgraph();
+                eg.listen(ssui);
+
+                ssui.monitor();
+
+                /*function safeDOMChangeWrapper(func) {
+                    observer.disconnect();
+                    func();
+                    observer.observe($textbox[0], config);
+                }
+
+                // Our text box
+                var $textbox = $('.r2_piece_editable_audio_textbox');
+                var $overlay = $('.r2_piece_editable_audio_textoverlay');
+
+                $textbox[0].addEventListener('keydown', function(e) {
+                    var allowed_keys = [8, 37, 38, 39, 40, 8];
+                    var allowed_keys_with_mod = [86, 88, 90, 67];
+                    if (e.keyCode === 32) { // SPACE
+
+                        var c = caret()+1;
+                        var $o = overlayAtIndex(c);
+                        if ($o.hasClass('pause')) {
+
+                            console.log('extending space');
+
+                            var added_space = $o.text() + '\xa0';
+                            $o.text(added_space);
+                            $o.attr('word', added_space);
+
+                            var $s = spanAtIndex(c);
+                            $s.css('letter-spacing', $o.width());
+                            $s.attr('word', added_space);
+
+                        } else if (overlayAtIndex(c+1).length > 0 && overlayAtIndex(c+1).hasClass('pause')) {
+
+                        } else { // insert space
+
+                            console.log('inserting space');
+
+                            // We don't want the MutationObserver to respond to this change...
+                            safeDOMChangeWrapper(function() {
+
+                                var uid = generateUID();
+                                var $space_overlay = generateSnip(uid, '\xa0');
+                                $o.after($space_overlay);
+
+                                var $space = generateSpan($space_overlay, uid, '\xa0');
+                                spanAtIndex(c).after($space);
+
+                                $space.css('letter-spacing', $space_overlay.width());
+
+                                updateIdx();
+
+                            });
+
+                        }
+
+                        e.preventDefault();
+
+                    } else if ($.inArray(e.keyCode, allowed_keys) > -1) {
+
+                    } else if ($.inArray(e.keyCode, allowed_keys_with_mod) > -1)  { // backspace / delete, x, z, c, v
+
+                    } else e.preventDefault();
+                });
+
+                function caret() {
+                    return getCaretOffset($textbox[0]); // no idea why its -67
+                }
+                function overlayAtIndex(c) {
+                    return $($overlay.children()[c-2]);
+                }
+                function spanAtIndex(c) {
+                    return $($textbox.children()[c-1]);
+                }
+                function updateIdx() {
+                    $textbox.children('span').each(function(value) {
+                        $(this).attr('idx', value+1);
+                    });
+                }
+                function nltoarr(nl) {
+                    var arr = [];
+                    for(var i = nl.length; i--; arr.unshift(nl[i]));
+                    return arr;
+                }
+                function generateUID() {
+                    return Math.round(new Date().getTime() + (Math.random() * 100));
+                }
+                function generateSnip(uid, word) {
+                    var $t = $snip.clone();
+                    $t.attr('id', uid);
+                    $t.text(word);
+                    if (word.indexOf('\xa0') === -1) $t.addClass('blue');
+                    else $t.addClass('pause');
+                    return $t;
+                }
+                function generateSpan($snip, uid, word) {
+                    var $n = $token.clone();
+                    $n.css('letter-spacing', $t.width());
+                    $n.attr('uid', uid);
+                    $n.attr('word', word);
+                    return $n;
+                }
+
+                $textbox.on('keydown', function() {
+                    setTimeout(function () {
+                        console.log("Caret offset: ", caret());
+                    }, 10);
+                });
+
+                // Charwidth prototype
+                var $token = $(document.createElement('span'));
+                $token.addClass('charwidth');
+                $token.text('\xa0');
+
+                // Ghosted text prototype
+                var $snip = $(document.createElement('span'));
+                $snip.addClass('textwidth');
+
+                var wrds = txt.split(' '); var $t, $n, uid;
+                wrds.forEach(function(word) {
+
+                    // Create unique id for text element
+                    uid = generateUID();
+
+                    // Create ghosted text span
+                    $t = generateSnip(uid, word);
+                    $overlay.append($t);
+
+                    // Created selectable span + set at width of text
+                    $n = generateSpan($t, uid, word);
+                    $textbox.append($n);
+
+                    $n.attr('idx', $textbox.children().index($n));
+                    console.log('index: ', $n.attr('idx'));
+
+                });
+
+
+                // Setup a MutationObserver to capture changes
+                // to the contenteditable div:
+                var observer = new MutationObserver(function(mutations) {
+
+                    var addedNodes = [];
+
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'attributes') return;
+
+                        console.log(mutation);
+
+                        updateIdx();
+
+                        $(mutation.removedNodes).each(function(value, index) {
+                            if(this.nodeType === 1 && $(this).hasClass('charwidth')) {
+                                var uid = $(this).attr('uid');
+                                $('#' + uid).remove();
+                                console.log($(this).attr('idx'), this);
+                            }
+                        });
+
+                        // Sort any added nodes:
+                        if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+
+                            var arr = nltoarr(mutation.addedNodes);
+                            for(var a of arr) {
+                                if ($(a).hasClass('charwidth'))
+                                    addedNodes.push(a);
+                            }
+                        }
+                    });
+
+                    if (addedNodes.length > 0) {
+                        addedNodes.sort(function(a,b) {
+                            console.log($(a).attr('idx'), $(b).attr('idx'));
+                            return Number($(a).attr('idx')) - Number($(b).attr('idx'));
+                        });
+                        console.log('added ', addedNodes);
+                        var previdx = Number($(addedNodes[0]).attr('idx'));
+                        $(addedNodes).each(function(value, index) {
+                            if(this.nodeType === 1) {
+                                var $prevtxt = overlayAtIndex(previdx);
+                                //var $prevtxt = $('#' + $(this).prev().attr('uid'));
+                                console.log(value, previdx, $prevtxt[0]);
+                                var uid = $(this).attr('uid');
+                                var word = $(this).attr('word');
+                                var $t = generateSnip(uid, word);
+                                if (previdx === 1) {
+                                    var $next = overlayAtIndex(previdx+1);
+                                    if (!$next || $next.length === 0) $overlay.prepend($t);
+                                    else                              $t.insertBefore($next);
+                                } else
+                                    $t.insertAfter($prevtxt);
+                                console.log("Added: ", word, this);
+                                previdx++;
+                            }
+                        });
+                    }
+                });
+                var config = { attributes: true, childList: true, characterData: true, subtree:true };
+                console.log($textbox[0]);
+                observer.observe($textbox[0], config);*/
+
+            });
+        </script>
+    </head>
+    <body>
+
+        <div class="r2_piece_editable_audio_textbox" contenteditable="true">
+
+            <div class="r2_piece_editable_audio_textoverlay unselectable" contenteditable="false">
+            </div>
+
+        </div>
+    </body>
+</html>

@@ -1,0 +1,57 @@
+.r2_piece_editable_audio_textoverlay {
+    position: absolute;
+    z-index: -1;
+}
+.r2_piece_editable_audio_textoverlay > .textwidth {
+    margin-left: 4px;
+    margin-right: 2px;
+}
+
+.r2_piece_editable_audio_textbox {
+    display: block;
+    border-style: solid;
+    border-width: 1px;
+    width: 400px;
+    height: 200px;
+    padding: 40px;
+}
+
+.r2_piece_editable_audio_textbox > .ssui-charwidth {
+    margin-left: 1px;
+    border-style: solid;
+    border-width: 1px;
+    letter-spacing: 20px;
+    margin-right: -2px;
+    z-index: 2;
+}
+.ssui-overlay {
+    position: absolute;
+    z-index: -1;
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    color: black;
+}
+.ssui-overlay > .ssui-textwidth {
+    margin-left: 4px;
+    margin-right: 2px;
+}
+.ssui-overlay > .pause {
+    background-color: #ffff99;
+    border-color: #7f8000;
+}
+.ssui-blue {
+    background-color: #bbe3f5;
+    border-color: Grey;
+    color: black;
+}
+
+.unselectable {
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
